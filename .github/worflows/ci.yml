@@ -1,0 +1,44 @@
+# Nome do nosso pipeline, que aparecerá no GitHub
+name: Build and Push Docker Images
+
+# Gatilho: Define quando este pipeline deve rodar.
+on:
+  # Roda toda vez que enviarmos ("push") código para a branch "main"
+  push:
+    branches: [ "main" ]
+
+# Tarefas: Define o trabalho que será feito
+jobs:
+  # Nome da nossa tarefa principal
+  build-and-push:
+    # A máquina virtual que o GitHub usará para rodar nossa tarefa
+    runs-on: ubuntu-latest
+
+    # Passos: A sequência de ações a serem executadas
+    steps:
+      # 1. Baixa o código do seu repositório para a máquina virtual
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Faz o login no Docker Hub usando os segredos que configuramos
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 3. Constrói a imagem do FormRelay e a envia para o Docker Hub
+      - name: Build and push FormRelay API
+        uses: docker/build-push-action@v5
+        with:
+          context: ./app-formrelay # Aponta para a pasta do serviço
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/formrelay-api:latest # Ex: jack/formrelay-api:latest
+
+      # 4. Constrói a imagem do Motor de IA e a envia para o Docker Hub
+      - name: Build and push AI Engine
+        uses: docker/build-push-action@v5
+        with:
+          context: ./app-ai-engine # Aponta para a pasta do serviço
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/ai-engine-api:latest # Ex: jack/ai-engine-api:latest
