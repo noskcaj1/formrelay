@@ -1,0 +1,29 @@
+# Versão do Docker Compose que estamos usando
+version: '3.8'
+
+# Define a lista de serviços (nossos contêineres)
+services:
+
+  # Este é o nosso serviço principal do FormRelay
+  formrelay-api:
+    # Instrução para construir a imagem a partir do Dockerfile na pasta especificada
+    build: ./app-formrelay
+    # Mapeia a porta 8080 do seu computador para a porta 8080 do contêiner
+    ports:
+      - "8080:8080"
+    # Carrega as variáveis de ambiente (nossos segredos) do arquivo .env
+    env_file:
+      - .env
+    # Define variáveis de ambiente adicionais
+    environment:
+      # Informa ao FormRelay como encontrar o Motor de IA na rede interna do Docker
+      - AI_ENGINE_URL=http://ai-engine-api:5000
+    # Garante que o serviço de IA seja iniciado antes do FormRelay
+    depends_on:
+      - ai-engine-api
+
+  # Este é o nosso serviço de Inteligência Artificial
+  ai-engine-api:
+    build: ./app-ai-engine
+    ports:
+      - "5000:5000"
