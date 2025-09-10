@@ -1,1 +1,12 @@
 .env
+/infra/terraform.tfvars
+# Ignorar arquivos de dependência e estado do Terraform
+# Ignorar arquivos de dependência e estado do Terraform
+/infra/.terraform/
+/infra/.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+# Ignorar arquivos de log do Terraform
+/infra/terraform.log
+# Ignorar arquivos de cache do Terraform
+/infra/.terraform.cache/
