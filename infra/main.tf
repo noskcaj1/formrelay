@@ -85,30 +85,27 @@ resource "oci_core_security_list" "formrelay_sl" {
   }
 }
 
-# --- 6. BUSCANDO A IMAGEM DO UBUNTU "ALWAYS FREE" ---
+# --- 6. BUSCANDO A IMAGEM DO UBUNTU "ALWAYS FREE" (VERSÃO x86_64 - CORRIGIDO) ---
+# Removemos o filtro 'display_name' para tornar a busca mais flexível e confiável.
 data "oci_core_images" "ubuntu_image" {
   compartment_id           = var.tenancy_ocid
   operating_system         = "Canonical Ubuntu"
   operating_system_version = "24.04"
-  shape                    = "VM.Standard.A1.Flex"
-  filter {
-    name   = "display_name"
-    values = ["Canonical-Ubuntu-24.04-aarch64-.*"]
-    regex  = true
-  }
+  shape                    = "VM.Standard.E2.1.Micro"
+  # O bloco "filter" foi completamente removido daqui.
 }
 
-# --- 7. DESCRIÇÃO DA MÁQUINA VIRTUAL (A VM) ---
+# --- 7. DESCRIÇÃO DA MÁQUINA VIRTUAL (A VM - VERSÃO MICRO) ---
+# Mudamos o shape para a versão Micro, que é menos potente mas mais disponível
 resource "oci_core_instance" "formrelay_vm" {
   compartment_id      = var.tenancy_ocid
   display_name        = "formrelay-vm-prod"
   availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
 
-  shape = "VM.Standard.A1.Flex"
-  shape_config {
-    ocpus         = 1
-    memory_in_gbs = 6
-  }
+  # Shape "Always Free-eligible" do tipo Micro
+  shape = "VM.Standard.E2.1.Micro" # <-- MUDANÇA
+
+  # O shape Micro não tem 'shape_config', então removemos esse bloco
 
   source_details {
     source_type = "image"
