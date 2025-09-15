@@ -10,6 +10,9 @@ COPY requirements.txt .
 # 4. Preparar a Massa: Instalar as dependências
 RUN pip install --no-cache-dir -r requirements.txt
 
+# 4.5. Baixar o modelo de linguagem do Spacy
+RUN python -m spacy download pt_core_news_lg
+
 # 5. Trazer o Recheio: Copiar o resto do código da nossa aplicação
 COPY . .
 
