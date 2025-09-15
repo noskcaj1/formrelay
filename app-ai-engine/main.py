@@ -26,16 +26,25 @@ def health_check():
 @app.post("/analyze")
 def analyze_text(request: AnalysisRequest):
     message_text = request.text
-    print(f"Iniciando análise via API externa para: '{message_text}'")
+    print(f"Iniciando análise de alta precisão para: '{message_text}'")
 
     try:
-        # 1. Análise de Sentimento
+        # 1. Análise de Sentimento com o modelo BERTimbau
         sentiment_model = "ruanchaves/bert-large-portuguese-cased-sentiment-analysis"
         sentiment_payload = {"inputs": message_text}
         sentiment_result = query_hf_api(sentiment_payload, HF_API_URL + sentiment_model)
-        sentiment_label = sentiment_result[0][0]['label'].upper()
 
-        # 2. Classificação de Tópico
+        # --- Lógica de Tradução para o novo modelo ---
+        raw_label = sentiment_result[0][0]['label'] # Ex: '5 stars'
+        score = sentiment_result[0][0]['score']
+        sentiment_label = "NEUTRAL" # Padrão
+        if '5 stars' in raw_label or '4 stars' in raw_label:
+            sentiment_label = "POSITIVE"
+        elif '1 star' in raw_label or '2 stars' in raw_label:
+            sentiment_label = "NEGATIVE"
+        # --- Fim da Lógica de Tradução ---
+
+        # 2. Classificação de Tópico (mantemos o modelo flexível)
         classifier_model = "facebook/bart-large-mnli"
         classifier_payload = {
             "inputs": message_text,
@@ -48,10 +57,12 @@ def analyze_text(request: AnalysisRequest):
             "text_received": message_text,
             "category": category_label,
             "sentiment": sentiment_label,
-            "summary": "Sumarização via API a ser implementada.",
-            "entities": {}
+            "details": {
+                "raw_sentiment_label": raw_label,
+                "sentiment_score": score
+            }
         }
-        print("Análise via API externa concluída.")
+        print("Análise de alta precisão concluída.")
         return analysis_result
 
     except Exception as e:
