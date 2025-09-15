@@ -30,7 +30,7 @@ def analyze_text(request: AnalysisRequest):
 
     try:
         # 1. Análise de Sentimento
-        sentiment_model = "lxyuan/distilbert-base-multilingual-cased-sentix-xlm-r"
+        sentiment_model = "ruanchaves/bert-large-portuguese-cased-sentiment-analysis"
         sentiment_payload = {"inputs": message_text}
         sentiment_result = query_hf_api(sentiment_payload, HF_API_URL + sentiment_model)
         sentiment_label = sentiment_result[0][0]['label'].upper()
