@@ -1,29 +1,37 @@
 import os
 import httpx
 from fastapi import FastAPI, Depends
-# ESTA É A CORREÇÃO PARA O ERRO "NameError: name 'BaseModel' is not defined"
+# IMPORTAÇÃO ADICIONAL para o CORS
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-# ESTAS SÃO AS CORREÇÕES PARA O ERRO "ImportError"
 import models
 import database
 
-# Esta linha usa as correções do "ImportError"
 models.Base.metadata.create_all(bind=database.engine)
 
-# --- Pydantic Models (Estrutura de Dados) ---
-# Esta linha usa a correção do "NameError"
 class FormSubmission(BaseModel):
     name: str
     email: str
     message: str
 
-# --- FastAPI App ---
 app = FastAPI()
 
-# --- Funções de Dependência ---
-# Esta função usa as correções do "ImportError"
+# --- CONFIGURAÇÃO DO CORS (O PORTEIRO) ---
+# Lista de "endereços" que têm permissão para falar com a nossa API.
+# O asterisco "*" significa "qualquer um", o que é ótimo para um serviço público como o nosso.
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"], # Permite todos os métodos (GET, POST, etc)
+    allow_headers=["*"], # Permite todos os cabeçalhos
+)
+# --- FIM DA CONFIGURAÇÃO DO CORS ---
+
 def get_db():
     db = database.SessionLocal()
     try:
@@ -31,7 +39,6 @@ def get_db():
     finally:
         db.close()
 
-# --- Endpoints da API ---
 AI_ENGINE_URL = os.getenv("AI_ENGINE_URL")
 
 @app.get("/health")
@@ -40,8 +47,8 @@ def health_check():
 
 @app.post("/submit/{form_id}")
 def submit_form(form_id: str, submission: FormSubmission, db: Session = Depends(get_db)):
+    # O resto do código permanece exatamente o mesmo...
     print(f"Recebida submissão para o formulário ID: {form_id}")
-    
     ai_analysis = {}
     try:
         response = httpx.post(f"{AI_ENGINE_URL}/analyze", json={"text": submission.message}, timeout=10.0)
@@ -51,7 +58,6 @@ def submit_form(form_id: str, submission: FormSubmission, db: Session = Depends(
     except httpx.RequestError as exc:
         print(f"ERRO: Falha ao comunicar com o Motor de IA: {exc}")
 
-    # Esta linha usa as correções do "ImportError"
     new_submission = models.Submission(
         form_id=form_id,
         name=submission.name,

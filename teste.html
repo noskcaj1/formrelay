@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Teste do FormRelay</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; }
+        input, textarea { width: 300px; margin-bottom: 1em; padding: 8px; }
+        input[type="submit"] { width: auto; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <h1>Página de Teste para o FormRelay</h1>
+    <p>Este formulário enviará dados para o seu servidor na nuvem.</p>
+
+    <form action="http://144.33.23.79/submit/meu-form-de-teste" method="POST" enctype="application/json">
+
+        <label for="name">Nome:</label><br>
+        <input type="text" id="name" name="name" value="Teste Pelo Navegador"><br>
+
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" value="navegador@teste.com"><br>
+
+        <label for="message">Mensagem:</label><br>
+        <textarea id="message" name="message">Esta é uma mensagem de teste enviada diretamente de uma página HTML!</textarea><br><br>
+
+        <input type="submit" value="Enviar para o Servidor">
+    </form>
+
+    <script>
+        // Pequeno script para converter os dados do formulário para JSON antes de enviar
+        const form = document.querySelector('form');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(result => {
+                alert('Sucesso! Resposta do servidor:\n' + JSON.stringify(result, null, 2));
+            })
+            .catch(error => {
+                alert('Erro! Veja o console para detalhes: ' + error);
+                console.error('Error:', error);
+            });
+        });
+    </script>
+
+</body>
+</html>
