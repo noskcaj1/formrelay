@@ -30,7 +30,7 @@ def analyze_text(request: AnalysisRequest):
 
     try:
         # 1. Análise de Sentimento
-        sentiment_model = "cardiffnlp/twitter-xlm-roberta-base-sentiment-v2"
+        sentiment_model = "distilbert/distilbert-base-uncased-finetuned-sst-2-english"
         sentiment_payload = {"inputs": message_text}
         sentiment_result = query_hf_api(sentiment_payload, HF_API_URL + sentiment_model)
         sentiment_label = sentiment_result[0][0]['label'].upper()
